@@ -23,8 +23,11 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+The internship date lives in one thread, but the bike-commute question sits
+next to a separate commuting thread, and pass/fail is mentioned both in its
+own thread and in first-year regrets. I expect retrieval to mix those up
+once. 5 of 5 would pretend that overlap isn't there; 3 of 5 would ignore
+that most answers sit in a single sentence of a labelled reply.
 
 ---
 
@@ -33,8 +36,11 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+The grounding prompt already tells the model to name the filename given in
+each excerpt, and every answer that passes the gate still goes through that
+prompt. Four of five would let the model skip the citation on one question
+and still count as working. The only way this fails is if the model ignores
+an instruction it is given every time, so all five is the right bar.
 
 ---
 
@@ -50,48 +56,48 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+The five out-of-scope questions (Mongolia, diesel oil, the World Cup,
+ibuprofen, Rust) share almost no vocabulary with these campus threads, so
+they should sit far from every chunk. I am not claiming 5 of 5 because I
+have not measured distances yet, and a question that happens to share a
+common word with a thread could land closer than I expect. 4 of 5 leaves
+room for that without treating the gate as optional.
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks are complete replies, not leftover tails
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+Every chunk contains at least one complete reply: a `--- reply` header and
+the full reply body, with no sentence or word cut off at either end. I will
+check all 26 chunks against this.
 
 **Why this target:**
-
-
+The starter's 800-character window produced 26 chunks from 23 threads. The
+three extras are leftover overlap tails — the bike commute thread fits in
+739 characters and still left a 59-character stub starting mid-word
+("nd it's the only reason I got mine back after it was taken."). Nobody
+could answer a question from that stub without the rest of the thread,
+which is the check the chunk printer asks. I am not requiring every thread
+to stay one chunk: first-year regrets is already 793 characters and five
+replies, so splitting *between* replies is fine. Splitting *inside* a reply
+is not.
 
 ---
 
-## 5. Your choice
+## 5. The named source is a file retrieval actually returned
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For all 5 of my test questions, the source file named in the answer is one
+of the files that retrieval returned for that question.
 
 **Why this target:**
-
-
+Criterion 2 only asks that a source is named. That is not enough here:
+each thread is a different conversation, and a model that cites
+`thread_bike_commute.txt` when retrieval actually returned
+`thread_parking.txt` has named a source and still pointed at the wrong
+one. The prompt already labels every excerpt `[from filename]`, so naming
+a different file means the model ignored the grounding it was given. Four
+of five would let that happen once, which is the failure this pipeline is
+supposed to catch.
 
 ---
 
